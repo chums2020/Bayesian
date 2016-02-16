@@ -2,6 +2,6 @@
 Code used: R
 
 Topics:
-  Find posterior mode
-  Construct credible intervals
-  Monte Carlo Markov Chain (MCMC)
+  1.   Find posterior mode
+  2.   Construct credible intervals
+  3.   Monte Carlo Markov Chain (MCMC)
