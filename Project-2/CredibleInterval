@@ -1,0 +1,8 @@
+#Assume the data have pareto distribution with parameter eta, and eta has a prior distribution of Gamma(α,β)
+#Use the function rpareto in the VGAM package to generate a r.s. of size 100
+#Construct a 95% Bayesian equal-tailed credible interval for eta, assume α = 2 and β = 0.5.
+
+
+
+
+#Find a 95% credible interval with length approximately 1, using any hyperparameter values. 
