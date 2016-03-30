@@ -104,3 +104,34 @@ d2 <- density(mh.draws[,2])
 plot(d2, main="Marginal Posterior Density of beta")
 abline(v=emp.hpd(mh.draws[,2], conf=0.95), col = "red")
 emp.hpd(mh.draws[,2], conf=0.95) #95% HPD interval for beta
+
+
+
+##########################Use MCMCpack package#########################
+#Instead of writing the Metropolist-Hasting algorithm from scratch, 
+#the MCMCpack package has a function that allows to construct a sample from a user-defined continuous distribution using
+#a random walk Metropolis algorithm.
+#see Documentation: http://mcmcpack.berkeley.edu/files/MCMCpack-manual.pdf
+
+#MCMCpack has dependency packages "graph" & "Rgraphviz" that are no longer provided by CRAN
+#In order to install them, specify the source from Bioconductor
+source("https://bioconductor.org/biocLite.R")
+biocLite("graph")
+biocLite("Rgraphviz")
+
+install.packages(MCMCpack,dependencies=TRUE)
+library(MCMCpack)
+
+#
+gammafun <- function(vector, x, N){
+  prior <- sqrt(vector[1]*trigamma(vector[1])-1)/vector[2]
+  likelihood <- prod(x^(vector[1]-1))*prod(exp(-vector[2]*x))*((vector[2]^vector[1])/gamma(vector[1]))^N  
+  working_cond_den <- prior*likelihood
+}
+Xdata <- rgamma(N, shape = 6, scale = 1/4)
+mh.draws <- MCMCmetrop1R(gammafun, theta.init=c(6, 4), x=Xdata, N=30, burnin = 1000, mcmc =10000, verbose = 1,logfun = FALSE, V=matrix(c(0.4,0,0,0.8),nrow=2, ncol=2))
+
+plot(mh.draws)
+summary(mh.draws)
+
+
