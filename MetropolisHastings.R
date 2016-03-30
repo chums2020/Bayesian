@@ -69,3 +69,16 @@ raftery.diag(mh.draws,q=0.025,r=0.005,s=0.95)
 
 #Heidelberg and Welch
 heidel.diag(mh.draws)
+
+
+#Plot the MCMC estimate of the marginal posterior density for each parameter with an 95% HPD interval for each parameter
+library(TeachingDemos)
+d1 <- density(mh.draws[,1])
+plot(d1, main="Marginal Posterior Density of alpha")
+abline(v=emp.hpd(mh.draws[,1], conf=0.95), col = "red")
+emp.hpd(mh.draws[,1], conf=0.95) #95% HPD interval for alpha
+
+d2 <- density(mh.draws[,2])
+plot(d2, main="Marginal Posterior Density of beta")
+abline(v=emp.hpd(mh.draws[,2], conf=0.95), col = "red")
+emp.hpd(mh.draws[,2], conf=0.95) #95% HPD interval for beta
