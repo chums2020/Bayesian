@@ -1,9 +1,46 @@
-#perform random walk Metropolis-Hastings sampling 
-#with 10,000 samples from a density which is proportional to gamma density times Jeffreys prior
+#Random Walk Metropolis-Hastings: constructing the kernel K that is associated with an arbitrary density
+  #generate some  data
+  #choose the starting values alpha & beta
+  #generate a new alpha & beta (assume independence? and sample from univariate Gaussian)
+  #compute acceptance probability
+  #accept or not
+#proposal_density, working_cond_den,k, n, alpha, beta
+GammaMHExample <- function(n.sim, n.burnin){
+  alpha <- 3; beta <-3 #pick the parameter values to generate a random "observed" data
+  N <- 30 #set observed sample size
+  x <- rgamma(N, shape = alpha, scale = 1/beta)#generate observed data of size N
+  
+  #defines a function that returns unnormalized posterior density
+  post_den <-function(alpha, beta, x, N){
+    prior <- sqrt(alpha*trigamma(alpha)-1)/beta#Jeffery's prior
+    likelihood <- prod(x^(alpha-1))*prod(exp(-beta*x))*((beta^alpha)/gamma(alpha))^N   #gamma distr
+    working_cond_den <- prior*likelihood # unnormalized target distr
+  }
+  
+  theta.mh <- matrix(NA, nrow = n.sim, ncol = 2) #empty matrix to store sampled parameters
+  theta.current <- rnorm(n = 2, mean = 3, sd = 0.5) #generate inital parameters
+  theta.update <- function(index, theta.current,x,N) {
+    #sample a new parameter value from Gaussian
+    theta.star <- rnorm(n = 1, mean = theta.current[index], sd = 0.5)
+    if (index == 1) #if it's sample for alpha, update the first element of the parameter vector
+      theta.temp <- c(theta.star, theta.current[2])
+    else theta.temp <- c(theta.current[1], theta.star)#for beta, update the second element
+    #compute MH ratio
+    r <- post_den(theta.temp[1],theta.temp[2],x,N)/post_den(theta.current[1],theta.current[2],x,N)
+    r <- min(r, 1, na.rm = TRUE) # r is the accpetance probability
+    if (runif(1) < r)
+      #runif(1) generates a uniform random number bewteen 0 and 1
+      #if runif(1) < r, accept the new value; else reject the new value and keep the old value
+      theta.star
+    else theta.current[index]
+  }
+    for (i in 1:n.sim) {
+    theta.current[1] <- theta.mh[i, 1] <- theta.update(1, theta.current,x, N) #iteration for alpha
+                                                       
+    theta.current[2] <- theta.mh[i, 2] <- theta.update(2, theta.current,x, N)#iteration for beta
+                                                       
+  }
+  theta.mh <- theta.mh[(n.burnin + 1):n.sim, ] #discard burn-in
+} 
 
-
-#Use the coda package to give traceplots, autocorrelation function plots and perform all 4 diagnostic checks (Gelman & Rubin, Geweke, Raftery & Lewis, and Heidelberg & Welch)
-
-
-#Plot MCMC estimate of the marginal posterior density for each parameter (using the sampled values)
-#Give an estimated 95% HPD interval for each parameter
+mh.draws <- GammaMHExample(n.sim = 10000, n.burnin = 1000)
