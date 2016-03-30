@@ -1,5 +1,5 @@
-#Random Walk Metropolis-Hastings: constructing the kernel K that is associated with an arbitrary density
-  #generate some  data
+##########################Random Walk Metropolis-Hastings#########################
+  #generate some "observed" data
   #choose the starting values alpha & beta
   #generate a new alpha & beta (assume independence? and sample from univariate Gaussian)
   #compute acceptance probability
@@ -44,3 +44,28 @@ GammaMHExample <- function(n.sim, n.burnin){
 } 
 
 mh.draws <- GammaMHExample(n.sim = 10000, n.burnin = 1000)
+
+
+##########################Diagnostics #########################
+library(coda)
+
+mh.draws <- mcmc(mh.draws)#turn the chain into an mcmc object
+summary(mh.draws)
+
+#Traceplot
+plot(mh.draws)
+
+#Autocorrelation function plots
+autocorr.plot(mh.draws)
+
+#Gelman and Rubin
+
+#Geweke 
+geweke.diag(mh.draws)
+
+
+#Raftery and Lewis
+raftery.diag(mh.draws,q=0.025,r=0.005,s=0.95)
+
+#Heidelberg and Welch
+heidel.diag(mh.draws)
