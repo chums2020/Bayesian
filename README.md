@@ -11,4 +11,6 @@ Topics:
       b. Diagnostic checks
 
       c. Plot the MCMC estimate of the marginal posterior density for each parameter with an 95% HPD interval for each parameter
+      
+      d. Alternative: use MCMCpack package
 
