@@ -1,5 +1,5 @@
 # Popular Bayesian methods
-Code used: R
+Language used: R
 
 Topics:
   1.   Find posterior mode
