@@ -6,54 +6,62 @@
   #accept or not
 #proposal_density, working_cond_den,k, n, alpha, beta
 GammaMHExample <- function(n.sim, n.burnin){
+  library(MASS)
   alpha <- 3; beta <-3 #pick the parameter values to generate a random "observed" data
   N <- 30 #set observed sample size
   x <- rgamma(N, shape = alpha, scale = 1/beta)#generate observed data of size N
-  
+
   #defines a function that returns unnormalized posterior density
   post_den <-function(alpha, beta, x, N){
-    prior <- sqrt(alpha*trigamma(alpha)-1)/beta#Jeffery's prior
-    likelihood <- prod(x^(alpha-1))*prod(exp(-beta*x))*((beta^alpha)/gamma(alpha))^N   #gamma distr
-    working_cond_den <- prior*likelihood # unnormalized target distr
+    #Jeffery's prior
+    prior <- sqrt(alpha*trigamma(alpha)-1)/beta 
+    #gamma distr
+    likelihood <- prod(x^(alpha-1))*prod(exp(-beta*x))*((beta^alpha)/gamma(alpha))^N  
+    # unnormalized target distr
+    working_cond_den <- prior*likelihood
   }
   
   theta.mh <- matrix(NA, nrow = n.sim, ncol = 2) #empty matrix to store sampled parameters
-  theta.current <- rnorm(n = 2, mean = 3, sd = 0.5) #generate inital parameters
-  theta.update <- function(index, theta.current,x,N) {
+  rho <- 0.05
+  #generate inital parameters
+  theta.current <- mvrnorm(n=1, mu = c(3,3), Sigma = matrix(c(0.3,rho,rho,0.6), nrow=2, ncol=2))
+  theta.update <- function(index, theta.current,x,N,i, rho) {
     if (index == 1){ #if it's sample for alpha, update the first element of the parameter vector
       #sample a new parameter value from Gaussian
-      theta.star <- rnorm(n = 1, mean = theta.current[index], sd = 0.3)
+      theta.star <- rnorm(n = 1, mean = theta.current[index], sd = sqrt(0.3-rho^2))
       #resample is drawn value is not positive
-      while (theta.star <=0){
-        print(theta.star);
-        theta.star <- rnorm(n = 1, mean = theta.current[index], sd = 0.3)
+      while(theta.star <=0){
+        theta.star <- rnorm(n = 1, mean = theta.current[index], sd = sqrt(0.6-rho^2))
         }
       theta.temp <- c(theta.star, theta.current[2])
-      #compute MH ratio
      
     }
     else {
-      theta.star <- rnorm(n = 1, mean = theta.current[index], sd = 0.6)
+      theta.star <- rnorm(n = 1, mean = theta.current[index]+
+                            rho*(theta.current[1]-theta.mh[i, 1]), sd = sqrt(1-rho^2))
       #resample is drawn value is not positive
-      while (theta.star <=0){
-        print(theta.star);
-        theta.star <- rnorm(n = 1, mean = theta.current[index] , sd = 0.6);
+      while(theta.star <=0){
+        theta.star <- rnorm(n = 1, mean = theta.current[index]+
+                              rho*(theta.current[1]-theta.mh[i, 1]), sd = sqrt(1-rho^2))
         }
       theta.temp <- c(theta.current[1], theta.star)#for beta, update the second element
       }
-      r <- post_den(theta.temp[1],theta.temp[2],x,N)/post_den(theta.current[1],theta.current[2],x,N)
+      #compute MH ratio
+      r <- post_den(theta.temp[1],theta.temp[2],x,N)/
+                                      post_den(theta.current[1],theta.current[2],x,N)
       r <- min(r, 1, na.rm = TRUE) # r is the accpetance probability, NA values are ignored
       if (runif(1) < r)
       #runif(1) generates a uniform random number bewteen 0 and 1
       #if runif(1) < r, accept the new value; else reject the new value and keep the old value
         theta.star
       else theta.current[index]
+    
   }
     for (i in 1:n.sim) {
-    theta.current[1] <- theta.mh[i, 1] <- theta.update(1, theta.current,x, N) #iteration for alpha
-                                                       
-    theta.current[2] <- theta.mh[i, 2] <- theta.update(2, theta.current,x, N)#iteration for beta
-                                                       
+    #iteration for alpha
+    theta.current[1] <- theta.mh[i, 1] <- theta.update(1, theta.current,x, N, i,rho) 
+    #iteration for beta                                                   
+    theta.current[2] <- theta.mh[i, 2] <- theta.update(2, theta.current,x, N, i,rho)
   }
   theta.mh <- theta.mh[(n.burnin + 1):n.sim, ] #discard burn-in
 } 
@@ -126,7 +134,7 @@ gammafun <- function(vector, x, N){
   prior <- sqrt(vector[1]*trigamma(vector[1])-1)/vector[2]
   likelihood <- prod(x^(vector[1]-1))*prod(exp(-vector[2]*x))*((vector[2]^vector[1])/gamma(vector[1]))^N  
   working_cond_den <- prior*likelihood
-  if(is.nan(prior)){return(0)}
+  if(is.nan(prior)){return(0)} #is parameter value is outside of parameter space, return 0 probability
   else{return(working_cond_den)}
 }
 Xdata <- rgamma(N, shape = 2, scale = 1/4)
