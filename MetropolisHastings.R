@@ -122,14 +122,15 @@ biocLite("Rgraphviz")
 install.packages(MCMCpack,dependencies=TRUE)
 library(MCMCpack)
 
-#
 gammafun <- function(vector, x, N){
   prior <- sqrt(vector[1]*trigamma(vector[1])-1)/vector[2]
   likelihood <- prod(x^(vector[1]-1))*prod(exp(-vector[2]*x))*((vector[2]^vector[1])/gamma(vector[1]))^N  
   working_cond_den <- prior*likelihood
+  if(is.nan(prior)){return(0)}
+  else{return(working_cond_den)}
 }
-Xdata <- rgamma(N, shape = 6, scale = 1/4)
-mh.draws <- MCMCmetrop1R(gammafun, theta.init=c(6, 4), x=Xdata, N=30, burnin = 1000, mcmc =10000, verbose = 1,logfun = FALSE, V=matrix(c(0.4,0,0,0.8),nrow=2, ncol=2))
+Xdata <- rgamma(N, shape = 2, scale = 1/4)
+mh.draws <- MCMCmetrop1R(gammafun, theta.init=c(2, 4), x=Xdata, N=30, burnin = 1000, mcmc =10000, verbose = 1,logfun = FALSE, V=matrix(c(0.4,0,0,0.8),nrow=2, ncol=2))
 
 plot(mh.draws)
 summary(mh.draws)
