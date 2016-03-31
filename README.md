@@ -6,7 +6,7 @@ Topics:
   2.   Construct credible intervals
   3.   Monte Carlo Markov Chain (MCMC)
     
-      a. Write a function to perform random walk Metropolis-Hastings sampling from a density which is proportional to gamma density times Jeffreys prior
+      a. Write a function to perform random walk Metropolis-Hastings sampling (Gibbs sampling in particular) from a density which is proportional to gamma density times Jeffreys prior
     
       b. Diagnostic checks
 
