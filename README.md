@@ -10,4 +10,8 @@
       c. Plot the MCMC estimate of the marginal posterior density for each parameter with an 95% HPD interval for each parameter  
       d. Alternative: use MCMCpack package
   4.   Bayesian linear regression using MCMCpack.MCMCregress
+  5.   Bayesian Binomial regression with logit and probit link functions  
+      a. comparison using Bayes factor  
+      b. leave-one-out postererior predictive distribution
 
+ 
