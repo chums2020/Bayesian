@@ -30,6 +30,8 @@ posterior_interval(fit2, prob = 0.95)
 #of the posterior predictive mean. Compare this estimate to the actual observed value of
 #that response variable.
 
+library(TeachingDemos)
+
 heart2 <- heart[2:nrow(heart),]
 
 #logit
@@ -38,10 +40,11 @@ fit1_omit <- stan_glm(chd ~sbp + tobacco +ldl + adiposity + famhist + typea + ob
                       family = binomial(link = "logit"), 
                       prior = normal(0, 1), prior_intercept = normal(0, 1))
 
+#simulate from posterior predictive distribution, using the predictor values for the omitted observation
 y_rep_logit <- posterior_predict(fit1_omit, newdata = heart[1,])
 table(y_rep_logit)
 posterior_predictive_mean_logit <- sum(y_rep_logit)/length(y_rep_logit)
-
+draw1 <- mcmc(y_rep_logit)
 
 #probit
 fit2_omit<- stan_glm(chd ~sbp + tobacco +ldl + adiposity + famhist + typea + obesity + alcohol + age,
@@ -52,9 +55,16 @@ fit2_omit<- stan_glm(chd ~sbp + tobacco +ldl + adiposity + famhist + typea + obe
 y_rep_probit <- posterior_predict(fit2_omit, newdata = heart[1,])
 table(y_rep_probit)
 posterior_predictive_mean_probit <- sum(y_rep_probit)/length(y_rep_probit)
+draw2 <- mcmc(y_rep_probit)
+
+#95% HPD interval (logit)
+emp.hpd(draw1, conf = 0.95)
 
 #posterior predictive mean (logit)
 posterior_predictive_mean_logit
+
+#95% HPD interval (probit)
+emp.hpd(draw2, conf = 0.95)
 
 #posterior predictive mean (probit)
 posterior_predictive_mean_probit
