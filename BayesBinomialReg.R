@@ -19,8 +19,19 @@ coef(fit2)
 posterior_interval(fit2, prob = 0.95)
 
 ##
-#Use MCMC to estimate marginal likelihood for each model and hence estimate Bayes factor
+#Use Laplace approximation to estimate marginal likelihood for each model and hence estimate Bayes factor
+library(MCMCpack)
+posterior_logit <- MCMClogit(chd ~
+                  sbp + tobacco +ldl + adiposity + famhist + typea + obesity + alcohol + age, 
+                  data = heart, burnin = 1000, mcmc = 10000, b0 = 0, B0 =  0.1, 
+                  user.prior.density=NULL, marginal.likelihood="Laplace")
 
+posterior_probit <- MCMCprobit(chd ~
+                   sbp + tobacco +ldl + adiposity + famhist + typea + obesity + alcohol + age, 
+                   data = heart, burnin = 1000, mcmc = 10000, b0 = 0, B0 = 0.1, 
+                   user.prior.density=NULL, marginal.likelihood="Laplace")
+
+BayesFactor(posterior_logit, posterior_probit )
 
 ##
 #Remove one data point from the original dataset. Fit the probit and logistic models again.
